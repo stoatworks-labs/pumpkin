@@ -27,14 +27,13 @@ captured from Resolume.*
 > the hashes and faces exactly and the rest to 1e-16. The test card's own painter, run in Chrome,
 > drew seven reference pictures; the plugin's are a mean of 0.24 to 0.81 code values from them,
 > with the bigger differences on edges, where no two renderers agree, and flat areas within 4 code
-> values bar a handful of pixels. Thirteen models broken on purpose and eight one-character changes
+> values bar a handful of pixels. Fourteen models broken on purpose and eight one-character changes
 > to the shipped code are all caught, and all 16 controls changed the picture in the harness's
 > sweep. The only host it's been run in on a Mac is the fleet's own test host, `oxbow`, which loads
 > it as `SW Pumpkin` (`PK01`, a source) and renders 120 frames through it, so it has **never been
 > loaded into Resolume on macOS**.
 >
-> **On Windows** the fleet's Arena gate has not yet run on this release, so it hasn't been loaded
-> into Resolume there either.
+> **On Windows** the fleet's Arena gate passed (9 of 9): it loads, registers and renders in Resolume Arena 7.27.1 on win-lab under software rendering (no GPU), every control as declared, and 14 of its 16 controls changed a still picture there (Clock and Expressions act on a moving one, so a still can't show them).
 >
 > The comparison with the test card is with its pictures as Chrome's software canvas paints them;
 > a test card on a GPU canvas may differ by a code value or so at edges. Try it on a spare layer
@@ -326,8 +325,8 @@ Windows  %LOCALAPPDATA%\pumpkin\logs\pumpkin.YYYY-MM-DD.log
 ## Known limits
 
 - **Never loaded into Resolume on macOS.** Everything was compiled, rendered and measured offline
-  against the plugin's own class in a headless GL context, plus a load in `oxbow`. On Windows the
-  Arena gate has not yet run.
+  against the plugin's own class in a headless GL context, plus a load in `oxbow`. On Windows it has
+  only been loaded by the fleet's Arena gate, on software rendering.
 - **Uniform tiles only.** The test card can also use a cabinet map imported from Pixel Peeker;
   Pumpkin can't.
 - **On *None* a carved patch tints the whole clip**, and there's no control for how strongly the

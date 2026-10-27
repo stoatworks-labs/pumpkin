@@ -2,8 +2,9 @@
 
 > **AI-assisted project.** This codebase was created with [Claude](https://claude.com/claude-code)
 > (Anthropic), directed and reviewed by a human author. It has **never been loaded into
-> Resolume**, on either platform; it is loaded by [oxbow](https://github.com/stoatworks-labs/oxbow),
-> a real FFGL host that is not Resolume, and has never been built on Windows. Everything
+> Resolume on macOS**; there it is loaded by [oxbow](https://github.com/stoatworks-labs/oxbow),
+> a real FFGL host that is not Resolume. On Windows it loads and renders in Resolume Arena
+> 7.27.1 under software rendering (see Status). Everything
 > below is measured by an offline harness that drives the real plugin class in a headless
 > GL context, on this Mac's GPU and again on Apple's software renderer. `pktest --port`
 > holds the plugin's port to the numbers the Test Card's own TypeScript prints: **every
@@ -81,9 +82,10 @@ patch; an unspanned test card output deals its own.
 
 ## Status
 
-**Not released, 27 October 2026.** Built and checked on one Mac, committed, and not yet
-on GitHub, the website or anyone's Resolume. There's a user guide in
-[docs/USER-GUIDE.md](docs/USER-GUIDE.md); no presets, no OpenFX port and no browser demo.
+**v0.1.0, 27 October 2026: the first release, and early days.** There's a
+[user guide](https://stoatworks-labs.com/software/pumpkin/guide/)
+([PDF](docs/USER-GUIDE.pdf)) and a [project page](https://stoatworks-labs.com/software/pumpkin/);
+no presets, no OpenFX port and no browser demo.
 
 - **Verified** (`tools/verify.sh`, all green): the port against the test card's own
   numbers and pictures (above); that every face's movement is linear, which is what
@@ -95,8 +97,10 @@ on GitHub, the website or anyone's Resolume. There's a user guide in
   steady candles and still faces not moving, plain pumpkins unlit, Background None
   transparent and premultiplied (`--still`); a resized instance painting what a fresh
   one would (`--resize`).
-- **Not verified:** anything in Resolume; anything on Windows; a GPU rasteriser other
-  than Apple's (the comparison with the test card would have to be measured again).
+- **On Windows**, the fleet's Arena gate (9 of 9 passed): it loads, registers and renders in Resolume Arena 7.27.1 on win-lab under software rendering (no GPU), every control as declared, and 14 of its 16 controls changed a still picture there (Clock and Expressions act on a moving one, so a still can't show them).
+- **Not verified:** anything in Resolume on macOS; a GPU rasteriser other than Apple's
+  (the comparison with the test card would have to be measured again); Windows on a real
+  GPU.
 - **Cost** (`pktest --bench`, Apple Silicon, median per frame): 0.44 ms at 720p, 0.64 ms
   at 1080p and 1.60 ms at 4K at the default 168 px tiles; 9.83 ms at 4K at the smallest
   16 px tiles, which is 32,400 pumpkins and probably more than anyone needs.

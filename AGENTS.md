@@ -160,10 +160,18 @@ contract; 14 negative controls, 14 caught; 8 mutants, 8 caught (two GLSL in the
 painter, one in the row flip, the hash's shift, the blink's length, a hole's
 ellipse, the smoothing radius, the steady candle); 16 controls swept, none dead.
 
+The Arena gate on win-lab, 2026-10-27, on a842a1c's Windows zip (the first
+MSVC build compiled clean): Arena 7.27.1 on llvmpipe, 9 passed, 0 failed.
+SW Pumpkin registers as PK01, a source; its 21 controls match name, order,
+type, range and default; it renders; 14 controls live, Clock and Expressions
+inconclusive (a time and a brief blink, on a moving patch). Expectation:
+`~/Projects/resolume/plugin-bench/arena/expect/pumpkin.json`, which holds
+Flicker and Expressions off for every still-picture control.
+
 ## Assumed, not verified
 
-- **Never loaded into Resolume**, on either platform. oxbow is a real FFGL host
-  that is not Resolume. Never built on Windows (CI would be the first place).
+- **Never loaded into Resolume on macOS.** oxbow is a real FFGL host that is
+  not Resolume. On Windows only the Arena gate's llvmpipe has run it.
 - That Resolume's composition texture shows 8-bit sRGB-encoded values as the
   canvas does: the comparison is in stored values, like everything in the fleet.
 - That Chrome's software canvas is the test card's picture. Its Download PNG
