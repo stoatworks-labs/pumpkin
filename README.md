@@ -60,6 +60,10 @@ macOS builds are signed and notarised and open normally. The Windows builds are 
 
 <!-- downloads:end -->
 
+## Video
+
+[![Pumpkin: the Test Card's pumpkin patch, for Resolume](docs/video-thumb.png)](https://www.youtube.com/watch?v=N6E7XCnqee0)
+
 ## The one idea
 
 **It is not a pumpkin like the test card's. It is the test card's pumpkin.** The
