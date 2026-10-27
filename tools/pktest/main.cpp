@@ -114,9 +114,14 @@ void putChunk( Bytes& out, const char* type, const Bytes& data )
 	putU32( out, static_cast< uint32_t >( crc ) );
 }
 
+/// With --alpha, --out keeps the output's alpha: Background None as a
+/// transparent PNG, for laying over a picture.
+bool g_keepAlpha = false;
+
 /// `rgba` is floats, row 0 at the BOTTOM (GL's order); the file is written top
 /// row first, which is the only place anything here flips. Premultiplied
-/// output is written as it is: a viewer shows the source over black.
+/// output is written as it is: a viewer shows the source over black. With
+/// --alpha it is unpremultiplied and its alpha kept, as PNG wants.
 bool writePng( const std::string& path, int width, int height, const Floats& rgba )
 {
 	Bytes raw;
@@ -125,14 +130,19 @@ bool writePng( const std::string& path, int width, int height, const Floats& rgb
 	{
 		raw.push_back( 0 );
 		for( int x = 0; x < width; ++x )
+		{
+			const float* px = &rgba[ ( static_cast< size_t >( y ) * width + x ) * 4 ];
 			for( int c = 0; c < 4; ++c )
 			{
-				//Alpha written as 1: a premultiplied source over black is what
-				//Resolume's Add shows, and a viewer that honours alpha would
-				//otherwise show the dead cells as the page behind.
-				const float v = c == 3 ? 1.0f : rgba[ ( static_cast< size_t >( y ) * width + x ) * 4 + c ];
+				//Alpha written as 1 unless asked: a premultiplied source over
+				//black is what Resolume's Add shows, and a viewer that honours
+				//alpha would otherwise show the clear tiles as the page behind.
+				float v = c == 3 ? 1.0f : px[ c ];
+				if( g_keepAlpha )
+					v = c == 3 ? px[ 3 ] : ( px[ 3 ] > 0.0f ? px[ c ] / px[ 3 ] : 0.0f );
 				raw.push_back( static_cast< unsigned char >( std::lround( std::clamp( v, 0.0f, 1.0f ) * 255.0f ) ) );
 			}
+		}
 	}
 	uLongf compressedSize = compressBound( static_cast< uLong >( raw.size() ) );
 	Bytes compressed( compressedSize );
@@ -1785,6 +1795,7 @@ int main( int argc, char** argv )
 			             "  --pipe            raw RGBA out, --frames N of them (0/absent: until the reader hangs up)\n"
 			             "  --film N          N frames, raw RGBA on stdout\n"
 			             "  --script PATH     cues for --pipe/--film: 'frame Name value'\n"
+			             "  --alpha           (with --out) keep the alpha: Background None as a transparent PNG\n"
 			             "  --fixtures DIR    the test card's fixtures (default %s)\n"
 			             "  --expect          a draft of the fleet Arena gate's expectation\n\n"
 			             "  checks: --testcard --tiles --clock --still --resize\n"
@@ -1805,6 +1816,8 @@ int main( int argc, char** argv )
 		}
 		else if( argument == "--fps" && hasNext )
 			fps = std::strtod( argv[ ++i ], nullptr );
+		else if( argument == "--alpha" )
+			g_keepAlpha = true;
 		else if( argument == "--fixtures" && hasNext )
 			g_fixtures = argv[ ++i ];
 		else if( argument == "--pipe" )

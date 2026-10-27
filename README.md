@@ -40,8 +40,8 @@ anyone's memory of what a pumpkin looks like. So:
   tiles here is Seed 1 on 168-pixel tiles there (on a spanned surface; see the note
   under Controls).
 - **Same candles.** Each candle is three flickers at about 1.3, 3.1 and 5.3 Hz, each
-  its own; each face blinks, winks, chomps, squints or gasps every three or four
-  seconds at a time of its own. With **Clock** set to **Wall**, the time is the test
+  its own; each face blinks, winks, chomps, squints or gasps every two and a half to
+  four seconds, at a time of its own. With **Clock** set to **Wall**, the time is the test
   card's own live clock, so a pumpkin in Resolume flickers in step with the same
   pumpkin on a test card output, on machines whose clocks agree.
 - **Same drawing.** The six faces are the test card's: classic, fierce, happy,
@@ -59,16 +59,19 @@ anyone's memory of what a pumpkin looks like. So:
 - **Patch:** Tile Width and Tile Height (16–4096 pixels; 168, the test card's default
   LED tile), Origin X and Origin Y (where the tile grid starts, in pixels), Seed
   (0–9999: which face goes where).
-- **Faces:** Classic, Fierce, Happy, Surprised, Sly, Goofy. Untick a face and the tiles
-  that had it are dealt again from the rest; untick all six and the pumpkins are plain.
+- **Faces:** Classic, Fierce, Happy, Surprised, Sly, Goofy. Untick a face and the patch
+  is dealt again from the rest: its tiles get other faces, and some of the other tiles
+  change too, as on the test card. Untick all six and the pumpkins are plain.
 - **Candles:** Flicker (off: a steady candle, as the test card's), Expressions (blinks,
   winks and chomps), Speed (still at the bottom, then a quarter to four times the test
   card's pace, 1x in the middle), Clock (*Resolume*: the clip's time, times Speed;
   *Wall*: the test card's live clock, seconds since 1 January 2026 by this machine's
   clock, which Speed does not touch).
 - **Look:** Background (*Night*: each tile its own night sky, as the test card draws
-  them; *Dark*: one night for every tile, so the grid disappears; *None*: transparent,
-  just the pumpkins, their glow and their shadows, to lay over the composition below).
+  them; *Dark*: one night for every tile, so the grid all but disappears (each glow still
+  stops at its tile's edge); *None*: transparent, just the pumpkins, their glow and their
+  shadows, to lay over the composition below. On square-ish tiles a carved pumpkin's glow
+  reaches the tile's corners, so it is a faint square of orange over the clip).
 
 The test card keys a tile on its place on the surface **and**, unless the outputs are
 spanned, on which output it is, so that six identical projectors do not all get the
@@ -78,8 +81,8 @@ patch; an unspanned test card output deals its own.
 ## Status
 
 **Not released, 27 October 2026.** Built and checked on one Mac, committed, and not yet
-on GitHub, the website or anyone's Resolume. No presets, no user guide, no OpenFX port
-and no browser demo.
+on GitHub, the website or anyone's Resolume. There's a user guide in
+[docs/USER-GUIDE.md](docs/USER-GUIDE.md); no presets, no OpenFX port and no browser demo.
 
 - **Verified** (`tools/verify.sh`, all green): the port against the test card's own
   numbers and pictures (above); that every face's movement is linear, which is what

@@ -18,6 +18,7 @@ geometry table (`Geometry.cpp`) or the painter (`Shaders.cpp`).
 - All six faces close up (docs/faces.png): `./build/pktest --out /tmp/faces.png --size 960x540 --set "Tile Width=320" --set "Tile Height=270" --set Seed=69 --frames 133`
 - List parameters: `./build/pktest --list`
 - Set anything by name: `./build/pktest --set "Seed=7" --set "Background=None"` (options by name or index)
+- Keep the alpha (Background None as a transparent PNG): add `--alpha` to `--out`
 - As video: `./build/pktest --pipe --frames 1800 --size 1280x720 --script cues.txt | ffmpeg -f rawvideo -pix_fmt rgba -s 1280x720 -r 60 -i - out.mp4`
   A cue line is `frame  Parameter Name  value` (`#` starts a comment). A standard
   control is linear between keys; an option, boolean or integer steps. Frame *n*

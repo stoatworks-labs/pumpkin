@@ -159,13 +159,24 @@ ellipse, the smoothing radius, the steady candle); 16 controls swept, none dead.
 
 ## Not done, open
 
-- No presets, no OpenFX port, no browser demo, no user guide, no Arena gate
-  (`pktest --expect` drafts the expectation).
+- No presets, no OpenFX port, no browser demo, no Arena gate (`pktest --expect`
+  drafts the expectation). The user guide is `docs/USER-GUIDE.md`; its pictures
+  are `pktest` renders, and the None panel is `pktest --alpha` laid over a frame
+  of Resolume's FogAndDust_3 demo clip.
 - Not registered: `StoatworksAbout.h` and `ATTRIBUTIONS.md` are provisional hand
   copies; no `.github/FUNDING.yml` or issue templates (the backend's sync makes
   them); no website page. Not on GitHub.
 - 16 px tiles at 4K cost 9.8 ms a frame (32,400 lanterns, each candle's three
   sines on the CPU each frame): fine at the default 168 px (1.6 ms at 4K).
+- **The glow stops at its tile's edge** (the test card clips each lantern to
+  its tile, and so does the shader: a pixel only ever paints its own tile). On
+  Night the tiles' colours hide it. On Dark it leaves a step of up to 8 code
+  values at tile edges (160 x 180 tiles; at most 1 between neighbours inside a
+  tile), and on None the glow fills square-ish tiles to the corners (alpha
+  never below 6/255 at 160 x 180), so over a clip each carved tile is a faint
+  orange square. Found writing the guide, 2026-10-27. A fix would paint the
+  neighbours' glows too (nine tiles per pixel) for Dark and None only, and
+  would stop matching the test card there.
 - Beat sync (a blink on the beat, candles that flare on a kick) was not asked
   for and is not here.
 - The test card's other per-tile and Halloween patterns (the hamsters, the
