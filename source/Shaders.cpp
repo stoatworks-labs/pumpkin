@@ -76,6 +76,7 @@ uniform vec3 WallColours[ 2 ];   // 0..255: unlit, lit
 uniform vec3 FlameColours[ 6 ];  // 0..255: stop 0, 0.45, 1, unlit then lit
 uniform vec3 HaloColours[ 2 ];   // 0..255: stop 0, stop 1
 uniform float HaloAlpha;         // at stop 0, times lit
+uniform int GlowClippedForTest;  // --glow's negative control: Night's clipped glow on every background
 out vec4 FragColor;
 
 vec2 vertexAt( int i, float e )
@@ -152,6 +153,15 @@ vec3 flame( vec2 q, float lit )
 	return t < 0.45 ? mix( s0, s1, t / 0.45 ) : mix( s1, s2, ( t - 0.45 ) / 0.55 );
 }
 
+// A candle's glow on its tile at r pumpkins from the centre: a radial
+// gradient from 0.2 to 1.1, its stops unpremultiplied (the canvas's
+// gradients interpolate that way).
+void glow( inout vec4 acc, float r, float lit )
+{
+	float t = clamp( ( r - 0.2 ) / 0.9, 0.0, 1.0 );
+	over( acc, mix( HaloColours[ 0 ], HaloColours[ 1 ], t ) / 255.0, mix( HaloAlpha * lit, 0.0, t ) );
+}
+
 void drawShape( int s, vec2 q, float px, float e, float lit, inout vec4 acc )
 {
 	vec4 box = texelFetch( Shapes, ivec2( 3, s ), 0 );
@@ -207,13 +217,30 @@ void main()
 	float sd = ( sl - 1.0 ) / max( length( sq / ( sl * vec2( 0.46, 0.07 ) ) ), 1e-6 );
 	over( acc, vec3( 0.0 ), 0.45 * clamp( 0.5 - sd / px, 0.0, 1.0 ) );
 
-	// The glow, behind it: from 0.2 to 1.1 of its width, unpremultiplied
-	// stops (the canvas's gradients interpolate that way).
-	if( face >= 0 )
+	// The glow, behind it. On Night it stops at the tile's edge, as the test
+	// card clips it. On Dark and None that edge has nothing to hide behind --
+	// a step of colour, or over a clip a square of orange round every carved
+	// tile -- so there each pixel takes the glows of its own tile and its
+	// eight neighbours. A glow is 1.1 pumpkins from its centre, which is at
+	// most 0.61 of a tile into the next, so the eight are all there can be;
+	// the tile texture has a border of one tile all round for the ones off
+	// the raster.
+	if( Background == 0 || GlowClippedForTest == 1 )
 	{
-		float t = clamp( ( length( q ) - 0.2 ) / 0.9, 0.0, 1.0 );
-		over( acc, mix( HaloColours[ 0 ], HaloColours[ 1 ], t ) / 255.0, mix( HaloAlpha * lit, 0.0, t ) );
+		if( face >= 0 )
+			glow( acc, length( q ), lit );
 	}
+	else
+		for( int dy = -1; dy <= 1; ++dy )
+			for( int dx = -1; dx <= 1; ++dx )
+			{
+				ivec2 n  = tile + ivec2( dx, dy );
+				vec4 ns  = texelFetch( Tiles, n - FirstTile, 0 );
+				if( int( floor( ns.x + 0.5 ) ) < 0 )
+					continue;
+				vec2 nq = ( vec2( pix ) + 0.5 - vec2( Origin + n * TileSize ) - Centre ) / Size;
+				glow( acc, length( nq ), ns.y );
+			}
 
 	for( int i = 0; i < BodyShapes.y; ++i )
 		drawShape( BodyShapes.x + i, q, px, 0.0, lit, acc );

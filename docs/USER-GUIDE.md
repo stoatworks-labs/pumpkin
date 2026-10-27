@@ -93,8 +93,9 @@ Each tile gets a pumpkin centred in it and sitting on a soft shadow, 80% of the 
 tall as fits 84% of its height counting the stem, whichever is smaller. Behind the pumpkin, the tile
 is its own night: six dark colours, dealt by the tile's column plus twice its row, so neighbours
 differ. A carved pumpkin glows: the candlelight comes through the holes, lights the cut flesh round
-them and casts an orange glow on the tile, which stops at the tile's edge, as it does on the test
-card. A plain pumpkin has no candle and no glow.
+them and casts an orange glow round it. On *Night* the glow stops at the tile's edge, as on the test
+card, where each tile's own colour hides the line; on *Dark* and *None* the neighbours' glows run on
+across it, so there's no line to see. A plain pumpkin has no candle and no glow.
 
 **Which face goes where** comes from the tile's place: a hash of the Seed and the position of the
 tile's top-left corner. So a tile keeps its face when you resize the output, and moving the grid a
@@ -189,9 +190,8 @@ changes the pace from where it is; it doesn't jump. Speed only applies to the *R
 **Background** (*Night*). What's behind the pumpkins:
 
 - *Night*: each tile its own night sky, as the test card draws them.
-- *Dark*: the test card's page colour on every tile, so the grid all but disappears. Each glow still
-  stops at its tile's edge, which leaves a step of a few code values there (up to 8 on 160 × 180
-  tiles, against at most 1 between neighbouring pixels inside a tile).
+- *Dark*: the test card's page colour on every tile, and the glows run on across the tiles' edges,
+  so the grid disappears.
 - *None*: transparent, so you get the pumpkins, their glow and their shadows over whatever's below.
   The output is premultiplied, as Resolume expects of a source.
 
@@ -201,9 +201,10 @@ changes the pace from where it is; it doesn't jump. Speed only applies to the *R
 FogAndDust_3 demo clip (bottom, 1280 × 360). 160 × 180 tiles, 24.65 seconds in. Rendered by
 `pktest`; the bottom panel's clip was laid underneath afterwards, as a layer below would be.*
 
-On *None* look at the bottom panel's tiles: the glow reaches every corner of a square-ish tile, so
-over a clip each carved tile is a faint square of orange and nothing between the pumpkins is quite
-clear. Plain pumpkins have no glow, and leave everything but themselves and their shadows clear.
+On *None* a carved patch lights the whole clip a little: the glows overlap, so nothing between the
+pumpkins is quite clear (on these tiles, never less than about 15% orange). For a clean overlay
+untick every face: plain pumpkins have no glow, and leave everything but themselves and their
+shadows clear.
 
 ### About
 
@@ -257,13 +258,13 @@ children's matinee; nothing ticked if the client thinks carved faces are a bit m
   ellipses and the rest as short straight pieces, each within 0.1 pixel of the canvas's curve on a
   pumpkin 4096 pixels wide. Every face's points are stored at rest and at the height of its
   expression, and mixed for each tile.
-- **The candles** are worked out on the CPU, in double precision, for every tile you can see, each
-  frame; their sines never touch the graphics card. Resolume's clock can run to hundreds of
+- **The candles** are worked out on the CPU, in double precision, for every tile you can see (and a
+  border of one tile round them, whose glows reach in on *Dark* and *None*), each frame; their sines never touch the graphics card. Resolume's clock can run to hundreds of
   millions of milliseconds, so time is taken frame to frame, never held in a single-precision
   number.
 - **The picture** is one pass. Each pixel works out which tile it's in and paints that tile's
   pumpkin, in the test card's order: the night, the shadow, the glow, the body, the cut flesh, the
-  candlelit holes.
+  candlelit holes. On *Dark* and *None* the glow is its own tile's and its eight neighbours'.
 
 ---
 
@@ -305,9 +306,9 @@ does uniform tiles, so it can't match a test card using an imported cabinet map.
 output** ticked there, and the two computers' clocks set from the network. A clock a second out is
 a candle a second out. Speed has no effect on *Wall*.
 
-**There are faint squares on Dark or None.** Each glow stops at its own tile's edge, as on the test
-card. On *Night* the tiles' own colours hide it; on *Dark* and *None* it shows a little. Plain
-pumpkins have no glow.
+**The clip looks orange on None.** That's the candles: the glows overlap and tint everything
+between the pumpkins a little. Untick every face for plain pumpkins, which have no glow, or put the
+layer at a lower opacity.
 
 **A face never does anything.** It does, but briefly: about a seventh of the time. Watch a few
 seconds, or check Expressions is on and Speed isn't at the bottom.
@@ -329,8 +330,8 @@ Windows  %LOCALAPPDATA%\pumpkin\logs\pumpkin.YYYY-MM-DD.log
   Arena gate has not yet run.
 - **Uniform tiles only.** The test card can also use a cabinet map imported from Pixel Peeker;
   Pumpkin can't.
-- **The glow stops at each tile's edge**, as the test card's does, which shows faintly on *Dark* and
-  *None*.
+- **On *None* a carved patch tints the whole clip**, and there's no control for how strongly the
+  candles glow.
 - **The test card's patch only on a span**, as described above.
 - **No beat sync.** The candles and faces keep their own time, not the music's. No presets, and no
   OpenFX version.

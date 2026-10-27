@@ -19,7 +19,7 @@ trap 'rm -rf "$WORK"' EXIT
 # file | the exact text | its one-character mutant | the check that must fail | what it is
 MUTANTS=(
 	"source/Shaders.cpp|over( acc, vec3( 0.0 ), 0.45 * clamp( 0.5 - sd / px, 0.0, 1.0 ) );|over( acc, vec3( 0.0 ), 0.95 * clamp( 0.5 - sd / px, 0.0, 1.0 ) );|--testcard|GLSL: the shadow twice as dark, 4 -> 9"
-	"source/Shaders.cpp|float t = clamp( ( length( q ) - 0.2 ) / 0.9, 0.0, 1.0 );|float t = clamp( ( length( q ) - 0.2 ) / 0.3, 0.0, 1.0 );|--testcard|GLSL: the glow a third the size, 9 -> 3"
+	"source/Shaders.cpp|float t = clamp( ( r - 0.2 ) / 0.9, 0.0, 1.0 );|float t = clamp( ( r - 0.2 ) / 0.3, 0.0, 1.0 );|--testcard|GLSL: the glow a third the size, 9 -> 3"
 	"source/Shaders.cpp|pix.y     = Raster.y - 1 - pix.y;|pix.y     = Raster.y - 2 - pix.y;|--tiles|GLSL: every row read one row off, 1 -> 2"
 	"source/Random.h|h ^= h >> 13;|h ^= h >> 12;|--port|C++: the hash's shift-xor one bit short, 13 -> 12"
 	"source/Lantern.cpp|const double len = 0.14;|const double len = 0.15;|--port|C++: a blink a little longer, 0.14 -> 0.15"

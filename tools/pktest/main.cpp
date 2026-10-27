@@ -908,6 +908,7 @@ struct Perturb
 	bool clockEpoch1970     = false;///< --clock: the Wall clock expected in seconds since 1970
 	bool stillFlicker       = false;///< --still: the steady patch rendered with Flicker on
 	bool resizeStale        = false;///< --resize: the tiles not dealt again when the raster grows
+	bool glowClipped        = false;///< --glow: every glow clipped at its tile, as on Night
 };
 
 using CheckFn = int ( * )( const Perturb& );
@@ -1574,6 +1575,65 @@ int runStill( const Perturb& perturb )
 }
 
 //===========================================================================
+// --glow: on Dark and None a tile's edge does not show. Night clips each
+// glow at its tile, as the test card does (--testcard holds that); on the
+// other two backgrounds each pixel takes its neighbours' glows too, so the
+// step across a boundary is the glow's own gradient. Measured against the
+// steps 2 and 3 pixels either side, on tiles taller than wide, where no
+// shape comes within 7 px of an edge: the boundary may be at most twice the
+// steepest of those, plus 0.001. With Flicker on, neighbouring candles differ
+// and a clipped glow leaves a step of up to tens of codes.
+//===========================================================================
+int runGlow( const Perturb& perturb )
+{
+	std::printf( "\n=== glow: on Dark and None a tile's edge does not show\n" );
+	for( const Raster& raster : kRasters )
+	{
+		const int tw = std::max( 16, raster.w / 4 ), th = std::max( 16, raster.h / 2 );
+		for( const Background background : { Background::None, Background::Dark } )
+		{
+			Rig rig;
+			if( !rig.Init( raster.w, raster.h ) )
+				return 1;
+			rig.Set( PT_TILE_WIDTH, static_cast< float >( tw ) );
+			rig.Set( PT_TILE_HEIGHT, static_cast< float >( th ) );
+			rig.Set( PT_EXPRESSIONS, 0.0f );
+			rig.Set( PT_BACKGROUND, static_cast< float >( background ) );
+			rig.plugin.SetGlowClippedForTest( perturb.glowClipped );
+			if( !rig.RenderAt( 5.5 ) )
+				return 1;
+			const Floats f = rig.Output();
+			//None: the alpha; Dark: the brightest channel. Rows top first.
+			auto v = [ & ]( int x, int y ) {
+				const size_t i = ( static_cast< size_t >( raster.h - 1 - y ) * raster.w + x ) * 4;
+				return background == Background::None ? f[ i + 3 ] : std::max( { f[ i ], f[ i + 1 ], f[ i + 2 ] } );
+			};
+			double edge = 0.0, inside = 0.0;
+			int edges   = 0;
+			for( int x0 = tw; x0 < raster.w - 3; x0 += tw, ++edges )
+				for( int y = 0; y < raster.h; ++y )
+				{
+					edge   = std::max( edge, static_cast< double >( std::fabs( v( x0, y ) - v( x0 - 1, y ) ) ) );
+					inside = std::max( { inside, static_cast< double >( std::fabs( v( x0 - 2, y ) - v( x0 - 3, y ) ) ),
+					                     static_cast< double >( std::fabs( v( x0 + 3, y ) - v( x0 + 2, y ) ) ) } );
+				}
+			for( int y0 = th; y0 < raster.h - 3; y0 += th, ++edges )
+				for( int x = 0; x < raster.w; ++x )
+				{
+					edge   = std::max( edge, static_cast< double >( std::fabs( v( x, y0 ) - v( x, y0 - 1 ) ) ) );
+					inside = std::max( { inside, static_cast< double >( std::fabs( v( x, y0 - 2 ) - v( x, y0 - 3 ) ) ),
+					                     static_cast< double >( std::fabs( v( x, y0 + 3 ) - v( x, y0 + 2 ) ) ) } );
+				}
+			Check( edges > 0 && edge <= 2.0 * inside + 0.001,
+			       fmt( "%dx%d, tiles %dx%d, Background %s: %d tile edges, the step across them at most %.4f, "
+			            "the glow's own 2-3 px in at most %.4f (twice it, plus 0.001)",
+			            raster.w, raster.h, tw, th, BackgroundName( background ), edges, edge, inside ) );
+		}
+	}
+	return Verdict();
+}
+
+//===========================================================================
 // --resize: a running instance resized is a fresh one at the new size.
 //===========================================================================
 int runResize( const Perturb& perturb )
@@ -1697,7 +1757,8 @@ const std::vector< CheckEntry >& checks()
 	static const std::vector< CheckEntry > list = {
 		{ "port", runPort, true },      { "linear", runLinear, true }, { "smoothing", runSmoothing, true },
 		{ "testcard", runTestcard, false }, { "tiles", runTiles, false }, { "clock", runClock, false },
-		{ "still", runStill, false },   { "resize", runResize, false }, { "names", runNames, true },
+		{ "still", runStill, false },   { "glow", runGlow, false },     { "resize", runResize, false },
+		{ "names", runNames, true },
 	};
 	return list;
 }
@@ -1740,6 +1801,7 @@ int runNegative( bool offlineOnly = false )
 	add( "clock", runClock, "take elapsed time from the host clock in float", []( Perturb& p ) { p.clockFloat = true; } );
 	add( "clock", runClock, "expect the Wall clock in seconds since 1970", []( Perturb& p ) { p.clockEpoch1970 = true; } );
 	add( "still", runStill, "render the steady patch with Flicker on", []( Perturb& p ) { p.stillFlicker = true; } );
+	add( "glow", runGlow, "clip every glow at its tile, as on Night", []( Perturb& p ) { p.glowClipped = true; } );
 	add( "resize", runResize, "keep the dealt tiles when only the raster grows", []( Perturb& p ) { p.resizeStale = true; } );
 
 	if( offlineOnly )
@@ -1798,7 +1860,7 @@ int main( int argc, char** argv )
 			             "  --alpha           (with --out) keep the alpha: Background None as a transparent PNG\n"
 			             "  --fixtures DIR    the test card's fixtures (default %s)\n"
 			             "  --expect          a draft of the fleet Arena gate's expectation\n\n"
-			             "  checks: --testcard --tiles --clock --still --resize\n"
+			             "  checks: --testcard --tiles --clock --still --glow --resize\n"
 			             "          no GL: --port --linear --smoothing --names\n"
 			             "          --negative   --bench\n"
 			             "  --offline         the checks and negative controls that need no GL context (CI)\n",

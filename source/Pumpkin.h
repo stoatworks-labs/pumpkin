@@ -100,6 +100,11 @@ public:
 		story   = seconds;
 		lastNow = -1.0;
 	}
+	/// --glow's negative control: every background's glow clipped at its tile, as Night's is.
+	void SetGlowClippedForTest( bool on )
+	{
+		glowClippedForTest = on;
+	}
 	/// --resize's negative control: the dealt tiles kept when only the raster changes.
 	void SetStaleDealForTest( bool on )
 	{
@@ -141,7 +146,7 @@ private:
 	int tileTexCols = 0, tileTexRows = 0;
 	std::vector< float > tileTexels;
 
-	//The patch: the visible tiles, dealt once per grid/seed/faces.
+	//The patch: the visible tiles and a border of one, dealt once per grid/seed/faces.
 	std::vector< TileState > tiles;
 	std::vector< TileClock > clocks;
 	int gridCols = 0, gridRows = 0, firstCol = 0, firstRow = 0;
@@ -162,6 +167,7 @@ private:
 
 	bool floatClockForTest = false;
 	bool staleDealForTest  = false;
+	bool glowClippedForTest = false;
 	int faceSkewForTest    = 0;
 };
 

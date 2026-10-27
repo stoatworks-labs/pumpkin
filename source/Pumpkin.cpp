@@ -254,7 +254,7 @@ unsigned PumpkinPlugin::FaceMask() const
 }
 
 //---------------------------------------------------------------------------
-// The visible tiles, each with its key, face, night and candle: drawn once a
+// The tiles, each with its key, face, night and candle: drawn once a
 // grid, a seed and a set of faces. Tiles count from the origin, as the test
 // card's `ledTiles` does, so a tile left of or above it is negative.
 //---------------------------------------------------------------------------
@@ -274,10 +274,12 @@ void PumpkinPlugin::Deal( int width, int height )
 	dealtMask = mask, dealtSkew = faceSkewForTest;
 	++rebuilds;
 
-	firstCol = floorDiv( -ox, tw );
-	firstRow = floorDiv( -oy, th );
-	gridCols = floorDiv( width - 1 - ox, tw ) - firstCol + 1;
-	gridRows = floorDiv( height - 1 - oy, th ) - firstRow + 1;
+	//The visible tiles and a border of one all round: on Dark and None a
+	//neighbour's glow reaches in from off the raster.
+	firstCol = floorDiv( -ox, tw ) - 1;
+	firstRow = floorDiv( -oy, th ) - 1;
+	gridCols = floorDiv( width - 1 - ox, tw ) + 1 - firstCol + 1;
+	gridRows = floorDiv( height - 1 - oy, th ) + 1 - firstRow + 1;
 	tiles.assign( static_cast< size_t >( gridCols ) * gridRows, TileState {} );
 	clocks.assign( tiles.size(), TileClock {} );
 	for( int r = 0; r < gridRows; ++r )
@@ -411,6 +413,7 @@ FFResult PumpkinPlugin::ProcessOpenGL( ProcessOpenGLStruct* pgl )
 		setVec3s( patchShader, "FlameColours", kFlame, 6, true );
 		setVec3s( patchShader, "HaloColours", kHalo, 2, true );
 		patchShader.Set( "HaloAlpha", kHaloAlpha );
+		patchShader.Set( "GlowClippedForTest", glowClippedForTest ? 1 : 0 );
 		quad.Draw();
 		unbindTextureUnits( 3 );
 	}

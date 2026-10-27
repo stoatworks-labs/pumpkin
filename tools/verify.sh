@@ -152,7 +152,7 @@ check_bundle "$BUILD/Pumpkin.bundle" "Pumpkin" "com.stoatworks.ffgl.pumpkin" PK0
 step "Checks (this Mac's GPU, at their rasters and 320x180)"
 #---------------------------------------------------------------------------
 # Every claim the README makes, in the order the README makes them.
-CHECKS="testcard tiles clock still resize"
+CHECKS="testcard tiles clock still glow resize"
 for check in port linear smoothing $CHECKS names; do
 	if out=$( "$PKTEST" --$check 2>&1 ); then
 		printf '   ok   pktest --%s: %s checks\n' "$check" "$( printf '%s\n' "$out" | grep -c '^  ok' )"

@@ -12,7 +12,7 @@
 > years of running, agree to 1e-16. `pktest --testcard` holds the picture to seven pictures
 > the Test Card's own painter drew in Chrome: **a mean difference of 0.24 to 0.81 code
 > values**, the rest at the edges, where no two rasterisers agree. `pktest --negative`
-> re-runs the checks against thirteen deliberately wrong models, and `tools/mutate.sh`
+> re-runs the checks against fourteen deliberately wrong models, and `tools/mutate.sh`
 > changes one character of the shipped shaders and code eight times; every one is caught.
 > A control sweep fails if any parameter does nothing.
 
@@ -68,10 +68,11 @@ anyone's memory of what a pumpkin looks like. So:
   *Wall*: the test card's live clock, seconds since 1 January 2026 by this machine's
   clock, which Speed does not touch).
 - **Look:** Background (*Night*: each tile its own night sky, as the test card draws
-  them; *Dark*: one night for every tile, so the grid all but disappears (each glow still
-  stops at its tile's edge); *None*: transparent, just the pumpkins, their glow and their
-  shadows, to lay over the composition below. On square-ish tiles a carved pumpkin's glow
-  reaches the tile's corners, so it is a faint square of orange over the clip).
+  them, each glow stopping at its tile's edge; *Dark*: one night for every tile, the
+  glows running on across the tiles' edges, so the grid disappears; *None*: transparent,
+  just the pumpkins, their glow and their shadows, to lay over the composition below.
+  The glows overlap, so a carved patch tints the whole clip a little; plain pumpkins
+  leave it clear).
 
 The test card keys a tile on its place on the surface **and**, unless the outputs are
 spanned, on which output it is, so that six identical projectors do not all get the
@@ -122,6 +123,7 @@ The offline harness renders the real plugin class headlessly:
     ./build/pktest --tiles        each tile's night; the patch keyed on the surface
     ./build/pktest --clock        Resolume's 499 million ms clock, Speed, scrubs, Wall
     ./build/pktest --still        what moves, what does not, and the backgrounds
+    ./build/pktest --glow         on Dark and None, no edge where tiles meet
     ./build/pktest --resize       a resized instance is a fresh one
     ./build/pktest --names        (no GL)
     ./build/pktest --negative     every check above, against a wrong model
