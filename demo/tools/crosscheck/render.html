@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  The page's renderer with nothing of the page around it, for pictures.mjs:
+  demo/pumpkin.js and demo/port.js, exactly as the page loads them, drawn once
+  at a story time set outright (pktest's RenderAt, SetStoryForTest) and read
+  back. Not served: demo/.assetsignore keeps tools/ off the site.
+-->
+<meta charset="utf-8" />
+<title>pumpkin render harness</title>
+<canvas id="c"></canvas>
+<script type="module">
+  import { createContext, Quad } from '../../vendor/gl.js';
+  import { PumpkinRenderer } from '../../pumpkin.js';
+  import { PT } from '../../port.js';
+
+  const canvas = document.getElementById('c');
+  const gl = createContext(canvas);
+  const quad = new Quad(gl);
+
+  function base64(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+
+  // One fresh instance per render, as pktest's Rig is: { w, h, tw, th, ox, oy,
+  // seed, mask, flicker, expressions, background, t }. Returns RGBA bytes,
+  // rows TOP first (the canvas's order, and pktest's Picture()), in base64.
+  window.renderAt = (o) => {
+    canvas.width = o.w;
+    canvas.height = o.h;
+    const r = new PumpkinRenderer(gl, quad);
+    const set = (id, v) => r.core.Set(id, v);
+    set(PT.TILE_WIDTH, o.tw);
+    set(PT.TILE_HEIGHT, o.th);
+    set(PT.ORIGIN_X, o.ox);
+    set(PT.ORIGIN_Y, o.oy);
+    set(PT.SEED, o.seed);
+    for (let f = 0; f < 6; ++f) set(PT.FACE_FIRST + f, (o.mask >> f) & 1);
+    set(PT.FLICKER, o.flicker ? 1 : 0);
+    set(PT.EXPRESSIONS, o.expressions ? 1 : 0);
+    set(PT.CLOCK, 0);
+    set(PT.BACKGROUND, o.background ?? 0);
+    r.core.SetStoryForTest(o.t);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, o.w, o.h);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    const frame = r.draw(o.w, o.h, 0, 0);
+    const bottomUp = new Uint8Array(o.w * o.h * 4);
+    gl.readPixels(0, 0, o.w, o.h, gl.RGBA, gl.UNSIGNED_BYTE, bottomUp);
+    const out = new Uint8Array(bottomUp.length);
+    const row = o.w * 4;
+    for (let y = 0; y < o.h; ++y) out.set(bottomUp.subarray((o.h - 1 - y) * row, (o.h - y) * row), y * row);
+    r.dispose();
+    return { pixels: base64(out), t: frame.t, cols: frame.cols, rows: frame.rows, error: gl.getError() };
+  };
+
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  window.renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+  window.ready = true;
+</script>

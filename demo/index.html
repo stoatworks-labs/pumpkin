@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pumpkin — browser demo | Stoatworks Labs</title>
+    <meta name="description" content="Try the Pumpkin FFGL source for Resolume in your browser: the Test Card's pumpkin patch, a jack-o'-lantern on every LED tile, six carved faces, flickering candles and blinking faces. The plugin's own GLSL, ported to WebGL2 unedited, fed by a JavaScript port of its CPU half that a check in its repository holds to the test card's own numbers and to the plugin's C++. A demo, not the plugin." />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./vendor/kit.css" />
+    <link rel="canonical" href="https://pumpkin-demo.stoatworks-labs.com/" />
+  </head>
+  <body>
+    <main id="demo">
+      <noscript>
+        <p>
+          This demo runs the plugin's shader and a port of its CPU half in your
+          browser, so it needs JavaScript and WebGL2. The plugin itself, its
+          source and its downloads are on
+          <a href="https://github.com/stoatworks-labs/pumpkin">its repository</a>.
+        </p>
+      </noscript>
+    </main>
+
+    <script type="module" src="./plugin.js"></script>
+    <script
+      src="./vendor/support-footer.js"
+      defer
+      data-app="Pumpkin"
+      data-repo="https://github.com/stoatworks-labs/pumpkin"
+      data-note="A browser demo of the plugin's shader over a port of its CPU half. It is a source: it reads nothing, and nothing you do here leaves your machine."
+    ></script>
+  </body>
+</html>

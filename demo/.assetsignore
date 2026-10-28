@@ -1,0 +1,7 @@
+# Not part of the page. tools/ holds check_shaders.py, the repo-side check that
+# the demo's shader copy still matches the plugin's (and the script that splices
+# it), and crosscheck/, which holds the C++ and JavaScript that compare the
+# page's port of the CPU half with the test card's numbers and the plugin's own
+# code, and the page's picture with the test card's; wrangler would otherwise
+# upload them and serve them, which is neither useful nor anybody's business.
+tools/

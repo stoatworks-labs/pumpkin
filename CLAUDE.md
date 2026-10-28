@@ -72,6 +72,24 @@ geometry table (`Geometry.cpp`) or the painter (`Shaders.cpp`).
   site page come from the website's `scripts/build_guides.py pumpkin` (always name the
   slug).
 
+## Browser demo
+- `demo/` is the page at https://pumpkin-demo.stoatworks-labs.com (Cloudflare Worker
+  `pumpkin-demo`, a ROUTE on a proxied AAAA 100:: record -- the zone's custom domains are
+  full; deleting the record takes the page dark with a green deploy). `deploy.yml`
+  redeploys it on a push to main; by hand: `cf-run npx wrangler deploy`. Locally:
+  `python3 -m http.server -d demo`.
+- `demo/shaders.js` is GENERATED: after changing `source/Shaders.cpp` run
+  `python3 demo/tools/check_shaders.py --write`; verify.sh fails on drift, on a piece the
+  check does not list, and on a change to how the pieces are joined.
+- `demo/port.js` is a hand port of Random.h, Lantern.cpp, Geometry.cpp, Controls.cpp and
+  Pumpkin.cpp's CPU half: change it with the C++. `bash demo/tools/crosscheck/crosscheck.sh
+  build/pktest` (verify.sh runs it; node, a C++ compiler, the submodule; Chrome for the
+  picture) holds it to the test card's numbers, the C++ (tables float for float), its 11
+  mutants, and the page's picture to the test card's and pktest's. When the test card
+  changes and the fixtures are regenerated, this check moves with them.
+- `demo/vendor/` is the shared kit: never edit it; re-vendor from the backend's
+  `resolume-demo/kit/` (pumpkin is not on `sync.sh`'s list yet).
+
 ## Diagnostics
 
 `source/Diag.{h,cpp}` is a log file only, with no crash handler (this runs

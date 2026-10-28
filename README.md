@@ -120,8 +120,8 @@ patch; an unspanned test card output deals its own.
 
 **v0.1.0, 27 October 2026: the first release, and early days.** There's a
 [user guide](https://stoatworks-labs.com/software/pumpkin/guide/)
-([PDF](docs/USER-GUIDE.pdf)) and a [project page](https://stoatworks-labs.com/software/pumpkin/);
-no presets, no OpenFX port and no browser demo.
+([PDF](docs/USER-GUIDE.pdf)), a [project page](https://stoatworks-labs.com/software/pumpkin/)
+and a [browser demo](https://pumpkin-demo.stoatworks-labs.com/); no presets and no OpenFX port.
 
 - **Verified** (`tools/verify.sh`, all green): the port against the test card's own
   numbers and pictures (above); that every face's movement is linear, which is what
@@ -140,6 +140,20 @@ no presets, no OpenFX port and no browser demo.
 - **Cost** (`pktest --bench`, Apple Silicon, median per frame): 0.44 ms at 720p, 0.64 ms
   at 1080p and 1.60 ms at 4K at the default 168 px tiles; 9.83 ms at 4K at the smallest
   16 px tiles, which is 32,400 pumpkins and probably more than anyone needs.
+
+## Browser demo
+
+**<https://pumpkin-demo.stoatworks-labs.com/>** — every control with its own name, group
+and default, the integers as number fields. The shader is the plugin's own GLSL, spliced
+unedited into `demo/shaders.js` (`demo/tools/check_shaders.py`, run by `tools/verify.sh`,
+fails on a changed character). The CPU half is a JavaScript port (`demo/port.js`): the
+hash, the faces, the deal, the candles and blinks, and the shape and vertex tables. It
+matches the test card's own numbers exactly and the plugin's C++ tables float for float.
+The page's picture in headless Chrome is a mean of 0.24 to 0.81 code values from the test
+card's seven pictures, and at most one code value from `pktest`'s at the same settings
+(`demo/tools/crosscheck/`, also run by verify.sh). It has no clip and no Restart (a
+source, and a scrub passes no time); the clock is the page's. It is a demo, not the plugin,
+and the page says what it does not reproduce.
 
 ## Build
 

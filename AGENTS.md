@@ -179,9 +179,64 @@ Flicker and Expressions off for every still-picture control.
 - The Wall clock agreeing with a test card on another machine needs both
   clocks synced (NTP): the plugin reads the system clock, nothing more.
 
+## The browser demo (2026-10-28)
+
+`demo/` is <https://pumpkin-demo.stoatworks-labs.com>, built to the fleet's
+`resolume-demo` kit rules (`~/Projects/resolume/specs/DEMO-BRIEF.md`) in the 2026-10-28
+demo sweep, from slipstream's and graticule's pages. What a reader of it must know:
+
+- **The shader is the plugin's.** kCommon, kQuadVertex and kPatchFragment plus kVersion,
+  spliced by `demo/tools/check_shaders.py --write` into `demo/shaders.js` and compared
+  character for character; it also fails on a piece it does not list and on a change to
+  the join on either side (`Assemble()`, InitGL's two stages, `demo/pumpkin.js`'s copy).
+  It compiles in WebGL2 as spliced (ANGLE on Metal, M4 Max; and SwiftShader): RGBA32F
+  textures read with texelFetch need no extension.
+- **The CPU half is a port** (`demo/port.js`, no GL, no DOM): Random.h, Lantern.cpp,
+  Geometry.cpp, Controls.cpp, the constructor's declarations and ProcessOpenGL's CPU half
+  (the clock, the deal, the tile texels, the uniforms). `demo/pumpkin.js` is the GL half.
+  `demo/tools/crosscheck/crosscheck.sh` (verify.sh runs it, about two minutes) holds it:
+  - `port.mjs`: the port against `tools/fixtures/testcard.txt` with `pktest --port`'s
+    measures. **Identical**: 6 hashes, 25 rng draws, 450 keys, 2,250 faces, 48 candles and
+    blinks to ten years, 9,576 points of 472 shapes.
+  - `printer.cpp` (the plugin's own code, built `-ffp-contract=off`, the declarations read
+    through the FFGL SDK's getters as a host reads them) against `run.mjs` (the port),
+    5,383 lines: the declarations, every key, face and night, the conversions, and the
+    shape and vertex tables **float for float** (1,856 and 5,120). Doubles within 1e-12;
+    727 of 32,572 differ in the last bit or two (V8's sin, cos, hypot and pow against
+    Apple's libm). No libm replay as slipstream's has: the GPU's floats are identical
+    without it, and pktest --port's own tolerance is 1e-12.
+  - 11 one-line mutants of the port (hash, rng, holes, blinks, candles, nights, smoothing,
+    flattening, curves, Speed, the deal), all caught.
+  - `pictures.mjs`: `render.html` (the page's renderer alone, at a story time set
+    outright) in headless Chrome, on the GPU and on SwiftShader, against the test card's
+    seven pictures with `pktest --testcard`'s measures (mean 0.240 to 0.813 codes, the
+    plugin's own range) and against `pktest --out` at the same settings, Dark and None
+    too: 6 of 4,032,000 pixels differ (GPU), 144 (SwiftShader), by one code value at most;
+    None's alpha within one. Negative controls: a quarter second early, the next seed.
+- **Decided without asking**: integers are number fields (graticule's answer); the About
+  block is off the panel; the Clip picker, "Use my own…" and **Restart** are removed
+  (Restart sends the host clock to 0, which the plugin treats as a scrub: no time passes,
+  so it would visibly do nothing); the clock's seconds-or-milliseconds vote is not ported
+  (the page sends seconds and says so, as pktest's `SetClockScaleForTest( 1.0 )` does);
+  the harness's test hooks are not ported (`GlowClippedForTest` is sent as 0).
+- **Differences, all said on the page**: the CPU half is a port and how it is checked; no
+  clip, no file, no Restart; the page's clock and the browser's Wall clock; integers and
+  the About block; never in Resolume on macOS, and the page's picture measured on one Mac.
+- **Verified headlessly** (cdpshot's Chrome, console and Log events collected): no console
+  errors; playing moves, Pause holds bit for bit, Step moves a frame; Seed, Background
+  None (over the checkerboard), every face unticked and 320 x 270 tiles each change the
+  picture; `?embed=1` shows the output only; no horizontal scroll at 390 px.
+- **Live** needs the proxied AAAA 100:: DNS record for `pumpkin-demo` (the zone's custom
+  domains are full; `wrangler.toml` has a ROUTE), and `deploy.yml` needs the repo's
+  `CLOUDFLARE_API_TOKEN` secret and `CLOUDFLARE_ACCOUNT_ID` variable. The live page logs
+  one console error that is not the page's: the zone's injected challenge script,
+  blocked by `script-src 'self'`, as on every `*-demo` host.
+- `stoatworks-backend/resolume-demo/sync.sh` does not list pumpkin yet: add it, or the
+  vendored kit here is one nothing checks.
+
 ## Not done, open
 
-- No presets, no OpenFX port, no browser demo. The user guide is
+- No presets, no OpenFX port. The user guide is
   `docs/USER-GUIDE.md`; its pictures are `pktest` renders, and the None panel is
   `pktest --alpha` (straight alpha, as PNG wants) laid over the middle of a frame
   of Resolume's FogAndDust_3 demo clip.

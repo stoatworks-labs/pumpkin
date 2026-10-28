@@ -65,6 +65,27 @@ step "Shaders"
 tools/glslc.sh || fail "a shader does not compile"
 
 #---------------------------------------------------------------------------
+step "Browser demo's shader"
+#---------------------------------------------------------------------------
+# demo/shaders.js carries a copy of source/Shaders.cpp. A copy that drifts
+# still paints a plausible pumpkin, so the drift has to fail here instead:
+# rerun `python3 demo/tools/check_shaders.py --write` after changing a shader.
+if [[ -f demo/tools/check_shaders.py ]]; then
+	log="$( mktemp )"
+	if python3 demo/tools/check_shaders.py >"$log" 2>&1; then
+		echo "   $( tail -1 "$log" )"
+	else
+		tail -14 "$log"
+		fail "the demo's shader has drifted from source/Shaders.cpp"
+	fi
+	rm -f "$log"
+elif [[ -d demo ]]; then
+	fail "demo/ exists but demo/tools/check_shaders.py does not"
+else
+	echo "   skipped: no demo/"
+fi
+
+#---------------------------------------------------------------------------
 step "Submodule"
 #---------------------------------------------------------------------------
 if [[ ! -f external/ffgl/CMakeLists.txt ]]; then
@@ -88,6 +109,31 @@ fi
 rm -f "$log"
 echo "ok   built, no warnings outside the SDK"
 PKTEST="$BUILD/pktest"
+
+#---------------------------------------------------------------------------
+step "Browser demo's port of the CPU half, and its picture"
+#---------------------------------------------------------------------------
+# demo/port.js deals, times and draws in JavaScript what Random.h, Lantern.cpp,
+# Geometry.cpp, Controls.cpp and Pumpkin.cpp do in C++. A port that drifts
+# still carves a plausible patch, so demo/tools/crosscheck/ holds it to the
+# test card's own numbers and to the plugin's C++ (the tables the GPU reads,
+# float for float), shows its mutants fail, and holds the page's picture in
+# headless Chrome to the test card's pictures and to pktest's. Needs node;
+# the picture needs Chrome and says so when it is skipped. About two minutes.
+if [[ -f demo/tools/crosscheck/crosscheck.sh ]]; then
+	if ! command -v node >/dev/null 2>&1; then
+		echo "   skipped: no node on this machine"
+	elif out=$( bash demo/tools/crosscheck/crosscheck.sh "$PKTEST" 2>&1 ); then
+		printf '%s\n' "$out" | sed 's/^/   /'
+	else
+		printf '%s\n' "$out" | tail -14
+		fail "the demo's port of the CPU half, or its picture, has drifted from the plugin"
+	fi
+elif [[ -d demo ]]; then
+	fail "demo/ exists but demo/tools/crosscheck/crosscheck.sh does not"
+else
+	echo "   skipped: no demo/"
+fi
 
 #---------------------------------------------------------------------------
 step "Bundles"
