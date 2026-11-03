@@ -126,7 +126,7 @@ jobs:
           rl_dmg "${{ matrix.name }}" out
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pumpkin-${{ matrix.name }}
           path: |
@@ -171,7 +171,7 @@ jobs:
           rl_nsis windows-x86_64 "$stage" --ffgl
           ls -l installers
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: pumpkin-windows-installer
           path: installers/*
